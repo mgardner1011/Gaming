@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DiceRoller : MonoBehaviour
 {
@@ -13,11 +14,24 @@ public class DiceRoller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public int[] DiceValues;
     public int DiceTotal;
+
+    public bool doneRolling = false;
+
+    public Sprite[] DiceImageOne;
+    public Sprite[] DiceImageZero;
+
+    public void NewTurn()
+        //Start of a players turn
+        //No roll yet
+    {
+        doneRolling = false;
+    }
+
     public void RollTheDice()
     {
 
@@ -29,8 +43,25 @@ public class DiceRoller : MonoBehaviour
         {
             DiceValues[i] = Random.Range(0, 2);
             DiceTotal += DiceValues[i];
+
+            //Displays sprite coresponding to the number generated. 
+            //Since there are three versions of a "1" or "0" it randomly chooses the sprite to display
+            //from avaiolable versions
+
+            if (DiceValues[i] == 0)
+            {
+                this.transform.GetChild(i).GetComponent<Image>().sprite =
+                    DiceImageZero[Random.Range(0, DiceImageZero.Length)];
+            }
+            else
+            {
+                this.transform.GetChild(i).GetComponent<Image>().sprite =
+                    DiceImageOne[Random.Range(0, DiceImageOne.Length)];
+            }
+            //setting doneRolling to true as a place holder for possible future animation
+            doneRolling = true;
         }
 
-        Debug.Log("Rolled" + DiceValues + "(" + DiceTotal + ")");
+       // Debug.Log("Rolled: " + DiceTotal);
     }
 }
