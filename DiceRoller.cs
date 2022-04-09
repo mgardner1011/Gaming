@@ -20,7 +20,7 @@ public class DiceRoller : MonoBehaviour
     public int[] DiceValues;
     public int DiceTotal;
 
-    public bool doneRolling = false;
+    public bool IsDoneRolling = false;
 
     public Sprite[] DiceImageOne;
     public Sprite[] DiceImageZero;
@@ -29,7 +29,7 @@ public class DiceRoller : MonoBehaviour
         //Start of a players turn
         //No roll yet
     {
-        doneRolling = false;
+        IsDoneRolling = false;
     }
 
     public void RollTheDice()
@@ -59,7 +59,7 @@ public class DiceRoller : MonoBehaviour
                     DiceImageOne[Random.Range(0, DiceImageOne.Length)];
             }
             //setting doneRolling to true as a place holder for possible future animation
-            doneRolling = true;
+            IsDoneRolling = true;
         }
 
        // Debug.Log("Rolled: " + DiceTotal);
