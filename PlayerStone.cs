@@ -8,19 +8,88 @@ public class PlayerStone : MonoBehaviour
     void Start()
     {
         theDiceRoller = GameObject.FindObjectOfType<DiceRoller>();
+
+        targetPosition = this.transform.position;
     }
+    public Tile StartingTile;
+    Tile currentTile;
+
+    bool scoreMe = false;
+
+    DiceRoller theDiceRoller;
+
+    Tile[] moveQueue;
+    int moveQueueIndex;
+
+    Vector3 targetPosition;
+    Vector3 velocity;
+    float smoothTime = .25f;
+    float smoothTimeVertricle = .1f;
+    float smoothDistance = 0.01f;
+    float smoothHeight = 0.5f;
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Vector3.Distance(
+            new Vector3(this.transform.position.x, targetPosition.y, this.transform.position.z),
+            targetPosition) < smoothDistance)
+        {
+             if(moveQueue != null && moveQueueIndex == (moveQueue.Length) && this.transform.position.y > smoothDistance)
+            {
+                this.transform.position = Vector3.SmoothDamp(
+                               this.transform.position,
+                               new Vector3(this.transform.position.x, 0, this.transform.position.z),
+                               ref velocity,
+                               smoothTimeVertricle);
+            }
+            else
+            {
+                AdvanceMoveQueue();
+            }
+        }
+        else if(this.transform.position.y < (smoothHeight - smoothDistance))
+        {
+            this.transform.position = Vector3.SmoothDamp(
+                this.transform.position,
+                new Vector3(this.transform.position.x, smoothHeight, this.transform.position.z),
+                ref velocity,
+                smoothTimeVertricle);
+        }
+        else
+        {
+            this.transform.position = Vector3.SmoothDamp(
+                this.transform.position,
+                new Vector3(targetPosition.x, smoothHeight, targetPosition.z),
+                ref velocity,
+                smoothTime);
+        }
+
     }
 
-    public Tile StartingTile;
-    Tile currentTile;
+    void AdvanceMoveQueue()
+    {
+        if (moveQueue != null && moveQueueIndex < moveQueue.Length)
+        {
+            Tile nextTile = moveQueue[moveQueueIndex];
+            if (nextTile == null)
+            {
+                //TODO: move to scored piles 
+                SetNewTargetPositon(this.transform.position + Vector3.left * 10f);
+            }
+            else
+            {
+                SetNewTargetPositon(nextTile.transform.position);
+                moveQueueIndex++;
+            }
 
-    DiceRoller theDiceRoller;
-
+        }
+    }
+    void SetNewTargetPositon(Vector3 pos)
+    {
+        targetPosition = pos;
+        velocity = Vector3.zero;
+    }
     void OnMouseUp()
     {
         //TODO: is the mouse over a UI object?
@@ -32,11 +101,17 @@ public class PlayerStone : MonoBehaviour
         }
         int spacesToMove = theDiceRoller.DiceTotal;
 
+        if (spacesToMove == 0)
+        {
+            return;
+        }
+
+        moveQueue = new Tile[spacesToMove];
         Tile finalTile = currentTile;
 
         for (int i = 0; i < spacesToMove; i++)
         {
-            if(finalTile == null)
+            if(finalTile == null && scoreMe == false)
             {
                 finalTile = StartingTile;
             }
@@ -45,9 +120,11 @@ public class PlayerStone : MonoBehaviour
                 if(finalTile.NextTiles == null || finalTile.NextTiles.Length == 0 )
                 {
                     //TODO: fidn a way to score
-                    Debug.Log("Score!");
-                    Destroy(gameObject);
-                    return;
+                    // Debug.Log("Score!");
+                    //Destroy(gameObject);
+                    //return;
+                    scoreMe = true;
+                    finalTile = null;
                 }
                 else if (finalTile.NextTiles.Length > 1)
                 {
@@ -59,15 +136,10 @@ public class PlayerStone : MonoBehaviour
                     finalTile = finalTile.NextTiles[0];
                 }
             }
-        }
-        if(finalTile == null)
-        {
-            return;
+            moveQueue[i] = finalTile;
         }
 
-        //moves piece to final tile in loop 
-
-        this.transform.position = finalTile.transform.position;
+        moveQueueIndex = 0;
         currentTile = finalTile;
     }
 }
