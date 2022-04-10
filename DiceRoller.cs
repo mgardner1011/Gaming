@@ -9,7 +9,16 @@ public class DiceRoller : MonoBehaviour
     void Start()
     {
         DiceValues = new int[4];
+        theStateManager = GameObject.FindObjectOfType<StateManager>();
     }
+
+    StateManager theStateManager;
+
+    public int[] DiceValues;
+
+
+    public Sprite[] DiceImageOne;
+    public Sprite[] DiceImageZero;
 
     // Update is called once per frame
     void Update()
@@ -17,32 +26,22 @@ public class DiceRoller : MonoBehaviour
 
     }
 
-    public int[] DiceValues;
-    public int DiceTotal;
-
-    public bool IsDoneRolling = false;
-
-    public Sprite[] DiceImageOne;
-    public Sprite[] DiceImageZero;
-
-    public void NewTurn()
-        //Start of a players turn
-        //No roll yet
-    {
-        IsDoneRolling = false;
-    }
-
     public void RollTheDice()
     {
 
+        if (theStateManager.IsDoneRolling == true)
+        {
+            //We've already rolled
+            return;
+        }
         // Random number generator chooses between "0" and "1" four times to simulate the four dice in Ur
         // and output a number between "0" and "4" (inclusive)
 
-        DiceTotal = 0;
+        theStateManager.DiceTotal = 0;
         for (int i = 0; i < DiceValues.Length; i++)
         {
             DiceValues[i] = Random.Range(0, 2);
-            DiceTotal += DiceValues[i];
+            theStateManager.DiceTotal += DiceValues[i];
 
             //Displays sprite coresponding to the number generated. 
             //Since there are three versions of a "1" or "0" it randomly chooses the sprite to display
@@ -58,10 +57,11 @@ public class DiceRoller : MonoBehaviour
                 this.transform.GetChild(i).GetComponent<Image>().sprite =
                     DiceImageOne[Random.Range(0, DiceImageOne.Length)];
             }
-            //setting doneRolling to true as a place holder for possible future animation
-            IsDoneRolling = true;
-        }
 
-       // Debug.Log("Rolled: " + DiceTotal);
+        }
+        //setting doneRolling to true as a place holder for possible future animation
+        theStateManager.IsDoneRolling = true;
+        theStateManager.CheckLegalMoves();
+        // Debug.Log("Rolled: " + DiceTotal);
     }
 }
