@@ -32,6 +32,13 @@ public class StateManager : MonoBehaviour
     }
 
 
+    public void RollAgain()
+    {
+        IsDoneRolling = false;
+        IsDoneClicking = false;
+        IsDoneAnimatting = false;
+    }
+
     // Update is called once per frame
     void Update()
     {
