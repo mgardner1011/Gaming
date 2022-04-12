@@ -12,6 +12,8 @@ public class Tile : MonoBehaviour
 
     public Tile[] NextTiles;
     public PlayerStone PlayerStone;
+    public bool IsScoringSpace;
+    public bool IsRollAgain;
 
     // Update is called once per frame
     void Update()
