@@ -15,7 +15,7 @@ public class CurrentPlayerDisplay : MonoBehaviour
     Text myText;
     StateManager theStateManager;
 
-    string[] numberWords = { "One", "Two" };
+    string[] numberWords = { "White", "Red" };
 
     // Update is called once per frame
     void Update()
