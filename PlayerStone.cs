@@ -10,6 +10,7 @@ public class PlayerStone : MonoBehaviour
         theStateManager = GameObject.FindObjectOfType<StateManager>();
 
         targetPosition = this.transform.position;
+
     }
     public Tile StartingTile;
     Tile currentTile;
@@ -17,9 +18,9 @@ public class PlayerStone : MonoBehaviour
     public int PlayerId;
     public StoneStorage MyStoneStorage;
 
-    bool scoreMe = false;
 
     StateManager theStateManager;
+
 
     Tile[] moveQueue;
     int moveQueueIndex;
@@ -115,6 +116,12 @@ public class PlayerStone : MonoBehaviour
             // The move queue is empty so we are done animatting.
             this.isAnimatting = false;
             theStateManager.IsDoneAnimatting = true;
+
+            //Are we on a roll again space
+            if(currentTile != null && currentTile.IsRollAgain)
+            {
+                theStateManager.RollAgain();
+            }
         }
     }
     void SetNewTargetPositon(Vector3 pos)
@@ -156,10 +163,7 @@ public class PlayerStone : MonoBehaviour
         
         //TODO: Check to see if destination is legal
 
-        if(finalTile == null)
-        {
-            scoreMe = true;
-        }
+
         if(finalTile!= null)
         {
             if(CanLegallyMoveTo(finalTile)== false)
@@ -184,10 +188,14 @@ public class PlayerStone : MonoBehaviour
         {
             currentTile.PlayerStone = null;
         }
-        finalTile.PlayerStone = this;
+        currentTile = finalTile;
+        if (finalTile.IsScoringSpace == false)
+        {
+            finalTile.PlayerStone = this;
+        }
 
         moveQueueIndex = 0;
-        currentTile = finalTile;
+
         theStateManager.IsDoneClicking = true;
         this.isAnimatting = true;
     }
@@ -206,7 +214,7 @@ public class PlayerStone : MonoBehaviour
 
         for (int i = 0; i < spacesToMove; i++)
         {
-            if (finalTile == null && scoreMe == false)
+            if (finalTile == null)
             {
                 finalTile = StartingTile;
             }
@@ -214,8 +222,9 @@ public class PlayerStone : MonoBehaviour
             {
                 if (finalTile.NextTiles == null || finalTile.NextTiles.Length == 0)
                 {
-                    //This means we are going off the board and sccoring
-                    finalTile = null;
+                    //We are overshooting the victory roll -- so return null in array
+                    //break out of the loop and return array with nulls at end, and no legal moves for that stone
+                    break;
                 }
                 else if (finalTile.NextTiles.Length > 1)
                 {
@@ -256,9 +265,10 @@ public class PlayerStone : MonoBehaviour
 
         if(destinaltionTile == null)
         {
-            //we're trying rto move off the board and score which is legal
-            Debug.Log("we're trying rto move off the board and score which is legal");
-            return true;
+
+            //NOTE: null tile means that we are over shooting the visctory roll
+            // and this is not legal
+            return false;
         }
         //does the tile already have a stone
         if(destinaltionTile.PlayerStone == null)
@@ -269,6 +279,12 @@ public class PlayerStone : MonoBehaviour
         if(destinaltionTile.PlayerStone.PlayerId == this.PlayerId)
         {
             //We can't land on our own stone
+            return false;
+        }
+
+        if(destinaltionTile.IsRollAgain == true)
+        {
+            //can't bop someone on a safe tile
             return false;
         }
         //is it a safe stone
